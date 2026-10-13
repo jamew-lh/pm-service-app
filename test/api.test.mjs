@@ -55,6 +55,7 @@ test('mechanic PIN 4321 signs in; wrong PIN does not', async () => {
   const setupRes = await s.call('GET', '/setup');
   assert.equal(setupRes.data.machines.length, 99);
   assert.ok(setupRes.data.mechanics.includes('RUSHANE DAVIS MORGAN'));
+  assert.ok(!setupRes.data.mechanics.includes('DAKOTA JENKINS'), 'Dakota is no longer listed');
   assert.equal(setupRes.data.today, '2026-10-13');
 });
 
@@ -64,7 +65,9 @@ test('mechanic cannot use office pages; office PIN can (any case)', async () => 
   assert.equal((await s.call('GET', '/office/data')).status, 403);
   assert.equal((await s.call('POST', '/login', { role: 'office', pin: '4321' })).status, 401);
   assert.equal((await s.call('POST', '/login', { role: 'office', pin: 'officetest9' })).status, 200);
-  assert.equal((await s.call('GET', '/office/data')).status, 200);
+  const od = await s.call('GET', '/office/data');
+  assert.equal(od.status, 200);
+  assert.ok(od.data.mechanics.includes('DAKOTA JENKINS'), 'office can still filter past records by Dakota');
   assert.equal((await s.call('GET', '/setup')).status, 200, 'office can also use mechanic screens');
 });
 
@@ -146,6 +149,7 @@ test('bad submissions are explained, not saved', async () => {
   await s.call('POST', '/login', { role: 'mech', pin: '4321' });
   const cases = [
     [{ mechanic: 'BOB' }, /who did the service/],
+    [{ mechanic: 'DAKOTA JENKINS' }, /who did the service/],
     [{ hours: '' }, /hour meter/],
     [{ date: '2026-10-20' }, /future/],
     [{ level: '', types: [] }, /Pick the service/],

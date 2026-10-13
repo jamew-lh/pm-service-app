@@ -85,7 +85,7 @@ screen** (Android) so the app opens like any other app.
   from its `FILTERS CHANGED` options. To add a machine, duplicate a table in
   Airtable, rename it to the equipment ID, and change those two fields' options.
   It appears in the app within 5 minutes.
-- **Mechanic names** are listed in `lib/config.mjs` (`MECHANICS`). Rushane
+- **Mechanic names** are listed in `lib/config.mjs` (`MECHANICS`). Someone who leaves moves to `PAST_MECHANICS`, so the office can still filter their old records. Rushane
   Davis Morgan is added to a table's EMPLOYEE options automatically the first
   time he submits on that machine.
 - **Older records** that have "SERVICE 1/2/3" typed in the notes show that as
