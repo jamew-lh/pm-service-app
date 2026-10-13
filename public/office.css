@@ -36,12 +36,13 @@
 .sh-head img { width: 190px; height: auto; }
 .sh-head .t { text-align: right; color: var(--green); font-weight: 800; font-size: 15px; line-height: 1.25; }
 .sh-head .t small { display: block; font-weight: 400; color: var(--muted); font-size: 10px; margin-top: 4px; }
-.sh-band { background: var(--green); color: #fff; border-radius: 5px; margin-top: 14px; padding: 12px 14px; display: grid; grid-template-columns: 150px repeat(4, minmax(0, 1fr)); gap: 4px 10px; }
-.sh-band .k { color: var(--tan); font-size: 8.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-.sh-band .big { font-size: 28px; font-weight: 800; line-height: 1.05; overflow-wrap: anywhere; }
+.sh-band { background: #fff; border: 1.5px solid var(--green); color: var(--ink); border-radius: 5px; margin-top: 14px; padding: 12px 14px; display: grid; grid-template-columns: 150px repeat(4, minmax(0, 1fr)); gap: 4px 10px; }
+.sh-band .k { color: var(--green); font-size: 8.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.sh-band .big { color: var(--green); font-size: 28px; font-weight: 800; line-height: 1.05; overflow-wrap: anywhere; }
 .sh-band .v { font-weight: 700; font-size: 13px; }
 .sh-band .mono { font-family: var(--mono); }
-.sh-band .since { grid-column: 2 / -1; color: #bfd3d1; font-size: 10px; }
+.sh-band > div:first-child { border-right: 1.5px solid var(--tan); grid-row: 1 / 3; }
+.sh-band .since { grid-column: 2 / -1; color: var(--muted); font-size: 10px; }
 .sh-sec { display: flex; align-items: center; gap: 8px; color: var(--green); font-weight: 800; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; margin: 16px 0 8px; }
 .sh-sec::after { content: ""; flex: 1; height: 1.5px; background: var(--tan); }
 .sh-svc { display: flex; gap: 36px; }
