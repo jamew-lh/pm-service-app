@@ -1,0 +1,19 @@
+{
+  "name": "pm-service-app",
+  "version": "1.0.0",
+  "description": "Lyons & Hohl equipment PM service log",
+  "scripts": {
+    "test": "node --test test/api.test.mjs",
+    "dev": "node test/dev-server.mjs"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@netlify/blobs": "11.1.1",
+    "pdf-lib": "1.17.1"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}

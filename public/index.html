@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PM Service Log · Lyons &amp; Hohl</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PM Service">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="top"><div class="in">
+  <img src="/logo.png" alt="Lyons &amp; Hohl Site Contractors" width="152" height="46">
+  <div class="what">PM SERVICE LOG<small id="who"></small></div>
+</div></header>
+
+<main class="wrap">
+  <!-- PIN -->
+  <section id="pinScreen" class="pin" hidden>
+    <h1>Mechanic sign-in</h1>
+    <p class="lede">Enter the shop PIN</p>
+    <div class="dots" id="dots" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    <div class="msg warn" id="pinErr" role="alert" hidden></div>
+    <div class="pad" id="pad"></div>
+  </section>
+
+  <div id="loading" class="msg info"><span class="spinner"></span> Loading…</div>
+  <div id="fatal" class="msg warn" role="alert" hidden></div>
+
+  <div id="app" class="stack" hidden>
+    <div class="tabs" role="tablist" aria-label="Screens">
+      <button role="tab" id="tabLog" aria-selected="true">Log a service</button>
+      <button role="tab" id="tabHist" aria-selected="false">Machine history</button>
+    </div>
+
+    <!-- LOG -->
+    <section id="logPane" class="stack">
+      <div id="form" class="stack">
+        <div class="group">
+          <h2 class="sec">Mechanic</h2>
+          <div class="chips" id="mechanics"></div>
+        </div>
+
+        <div class="group">
+          <h2 class="sec">Equipment</h2>
+          <input type="text" id="eqid" class="eqinput" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="e.g. 336-06" aria-label="Equipment ID">
+          <div class="suggest" id="suggest"></div>
+          <div id="machineBox"></div>
+        </div>
+
+        <div id="rest" class="stack dim">
+          <div class="group">
+            <h2 class="sec">Date &amp; hours</h2>
+            <div class="row2">
+              <div><label class="label" for="date">Service date</label><input type="date" id="date"></div>
+              <div><label class="label" for="hours">Hour meter</label><input type="number" id="hours" inputmode="decimal" min="0" step="0.1" placeholder="0"></div>
+            </div>
+            <div id="hoursMsg"></div>
+          </div>
+
+          <div class="group">
+            <h2 class="sec">Service <small>pick one</small></h2>
+            <div class="seg" id="level"></div>
+          </div>
+
+          <div class="group">
+            <h2 class="sec">Service type <small>pick any</small></h2>
+            <div class="chips" id="stype"></div>
+          </div>
+
+          <div class="group">
+            <h2 class="sec">Filters changed</h2>
+            <div><button type="button" class="linkbtn" id="allFilters">Select all</button></div>
+            <div class="checks" id="filters"></div>
+          </div>
+
+          <div class="group">
+            <h2 class="sec">Fluids added <small>tap to add</small></h2>
+            <div class="chips" id="fluidPick"></div>
+            <div class="fluids" id="fluidRows"></div>
+          </div>
+
+          <div class="group">
+            <h2 class="sec">Other filters / parts</h2>
+            <textarea id="parts" placeholder="Part numbers or anything not listed above"></textarea>
+          </div>
+          <div class="group">
+            <h2 class="sec">Service notes</h2>
+            <textarea id="notes" placeholder="What you found, what needs follow-up"></textarea>
+          </div>
+        </div>
+
+        <button class="btn primary" id="toReview" disabled>Review &amp; submit</button>
+        <div class="missing" id="missing"></div>
+      </div>
+
+      <section id="review" class="stack review" hidden>
+        <h2 class="sec">Check before sending</h2>
+        <table id="revRows"></table>
+        <div class="msg warn" id="sendErr" role="alert" hidden></div>
+        <button class="btn primary" id="send">Submit</button>
+        <button class="btn ghost" id="edit">Back to edit</button>
+      </section>
+
+      <section id="done" class="stack" hidden>
+        <h2 class="sec">Saved</h2>
+        <div class="msg ok" id="doneTxt"></div>
+        <div class="msg warn" id="doneWarn" hidden></div>
+        <button class="btn primary" id="another">Log another service</button>
+        <button class="btn ghost" id="doneHist">See this machine's history</button>
+      </section>
+    </section>
+
+    <!-- HISTORY -->
+    <section id="histPane" class="stack" hidden>
+      <div class="group">
+        <h2 class="sec">Equipment</h2>
+        <input type="text" id="hEq" class="eqinput" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="e.g. 938-09" aria-label="Equipment ID for history">
+        <div class="suggest" id="hSuggest"></div>
+      </div>
+      <div id="hOut" class="stack"></div>
+    </section>
+  </div>
+</main>
+<div class="foot" id="foot" hidden><button type="button" class="linkbtn" id="signOut">Sign out of this phone</button></div>
+
+<script src="/shared.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

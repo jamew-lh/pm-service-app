@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PM Service Office · Lyons &amp; Hohl</title>
+<meta name="theme-color" content="#ffffff">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.png">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/office.css">
+</head>
+<body>
+<header class="top"><div class="in">
+  <img src="/logo.png" alt="Lyons &amp; Hohl Site Contractors" width="152" height="46">
+  <div class="what">PM SERVICE · OFFICE<small><button type="button" class="linkbtn" id="signOut" hidden>Sign out</button></small></div>
+</div></header>
+
+<main class="wrap wide">
+  <section id="pinScreen" class="pin" hidden>
+    <h1>Office sign-in</h1>
+    <p class="lede">Enter the office PIN</p>
+    <form id="pinForm" class="stack" style="gap:10px">
+      <input type="password" id="pin" autocomplete="current-password" autocapitalize="characters" spellcheck="false" aria-label="Office PIN" placeholder="Office PIN">
+      <div class="msg warn" id="pinErr" role="alert" hidden></div>
+      <button class="btn primary" type="submit" id="pinGo">Sign in</button>
+    </form>
+  </section>
+
+  <div id="loading" class="msg info" hidden><span class="spinner"></span> Loading…</div>
+  <div id="fatal" class="msg warn" role="alert" hidden></div>
+
+  <section id="listScreen" class="stack" hidden>
+    <div class="bar">
+      <div><h1>Service records</h1><p class="lede">All machines, newest first</p></div>
+      <button class="btn ghost small" id="refreshAll" type="button">Check for new records</button>
+    </div>
+    <div class="msg info" id="sync" hidden></div>
+    <div class="filters">
+      <div><label class="label" for="fMach">Machine</label><select id="fMach"></select></div>
+      <div><label class="label" for="fMech">Mechanic</label><select id="fMech"></select></div>
+      <div><label class="label" for="fLvl">Service</label><select id="fLvl"></select></div>
+      <div><label class="label" for="fWhen">Period</label>
+        <select id="fWhen"><option value="30">Last 30 days</option><option value="90" selected>Last 90 days</option><option value="365">Last 12 months</option><option value="">All time</option></select></div>
+      <div><label class="label" for="fFlag">Show</label>
+        <select id="fFlag"><option value="">Everything</option><option value="hours">Hours to check</option><option value="nopdf">No PDF attached</option></select></div>
+    </div>
+    <div id="machineSummary"></div>
+    <div class="count" id="count"></div>
+    <div class="list" id="list"></div>
+    <button class="btn ghost" id="more" type="button" hidden>Show more</button>
+  </section>
+
+  <section id="detailScreen" class="stack" hidden>
+    <div class="bar">
+      <button class="btn ghost small" id="back" type="button">&larr; All records</button>
+      <div class="actions">
+        <button class="btn ghost small" id="attach" type="button" hidden>Attach PDF to Airtable</button>
+        <a class="btn ghost small" id="view" target="_blank" rel="noopener">Open PDF</a>
+        <a class="btn primary small" id="dl">Download PDF</a>
+      </div>
+    </div>
+    <div class="msg" id="detailMsg" hidden></div>
+    <div class="sheetwrap"><div class="sheet" id="sheet"></div></div>
+  </section>
+</main>
+
+<script src="/shared.js"></script>
+<script src="/office.js"></script>
+</body>
+</html>
