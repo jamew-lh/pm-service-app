@@ -67,7 +67,12 @@ input[type=text], input[type=number], input[type=date], input[type=password], te
 input:focus, textarea:focus, select:focus { border-color: var(--green); background: var(--white); outline: none; box-shadow: 0 0 0 3px rgba(0, 71, 69, .15); }
 textarea { min-height: 80px; resize: vertical; }
 .eqinput { font-family: var(--mono); font-size: 22px !important; text-transform: uppercase; letter-spacing: .04em; }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 360px) { .row2 { grid-template-columns: minmax(0, 1fr); } }
+/* iPhone Safari gives date boxes a fixed minimum width; let them shrink to the column */
+input[type=date] { -webkit-appearance: none; appearance: none; display: block; min-width: 0; max-width: 100%; text-align: left; }
+input[type=date]::-webkit-date-and-time-value { text-align: left; margin: 0; }
+input[type=date]::-webkit-calendar-picker-indicator { margin-left: 4px; }
 .row2 > div { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 
 /* Machine band, like the green band on the PDF */
