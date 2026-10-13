@@ -6,7 +6,7 @@ import { makeAirtable } from '../lib/airtable.mjs';
 import { splitFilter, findMachine, machinesFromTables } from '../lib/records.mjs';
 import { makeFakeAirtable, machineByName } from './fake-airtable.mjs';
 
-const ENV = { AIRTABLE_TOKEN: 'patTEST', SESSION_SECRET: 'x'.repeat(32), MECH_PIN: '1815', OFFICE_PIN: 'LNH1815H' };
+const ENV = { AIRTABLE_TOKEN: 'patTEST', SESSION_SECRET: 'x'.repeat(32), MECH_PIN: '4321', OFFICE_PIN: 'OFFICETEST9' };
 const NOW = Date.parse('2026-10-13T14:00:00Z');
 
 function setup(opts = {}) {
@@ -43,11 +43,11 @@ test('nothing works before signing in', async () => {
   assert.deepEqual((await s.call('GET', '/me')).data, { role: null });
 });
 
-test('mechanic PIN 1815 signs in; wrong PIN does not', async () => {
+test('mechanic PIN 4321 signs in; wrong PIN does not', async () => {
   const s = setup();
   const bad = await s.call('POST', '/login', { role: 'mech', pin: '1234' });
   assert.equal(bad.status, 401);
-  const ok = await s.call('POST', '/login', { role: 'mech', pin: '1815' });
+  const ok = await s.call('POST', '/login', { role: 'mech', pin: '4321' });
   assert.equal(ok.status, 200);
   assert.match(ok.headers.get('set-cookie'), /HttpOnly; SameSite=Lax; Max-Age=15552000; Secure/);
   const me = await s.call('GET', '/me');
@@ -60,10 +60,10 @@ test('mechanic PIN 1815 signs in; wrong PIN does not', async () => {
 
 test('mechanic cannot use office pages; office PIN can (any case)', async () => {
   const s = setup();
-  await s.call('POST', '/login', { role: 'mech', pin: '1815' });
+  await s.call('POST', '/login', { role: 'mech', pin: '4321' });
   assert.equal((await s.call('GET', '/office/data')).status, 403);
-  assert.equal((await s.call('POST', '/login', { role: 'office', pin: '1815' })).status, 401);
-  assert.equal((await s.call('POST', '/login', { role: 'office', pin: 'lnh1815h' })).status, 200);
+  assert.equal((await s.call('POST', '/login', { role: 'office', pin: '4321' })).status, 401);
+  assert.equal((await s.call('POST', '/login', { role: 'office', pin: 'officetest9' })).status, 200);
   assert.equal((await s.call('GET', '/office/data')).status, 200);
   assert.equal((await s.call('GET', '/setup')).status, 200, 'office can also use mechanic screens');
 });
@@ -72,16 +72,16 @@ test('five wrong PINs lock that device out for 15 minutes', async () => {
   const s = setup();
   for (let i = 0; i < 4; i++) assert.equal((await s.call('POST', '/login', { role: 'mech', pin: '0000' })).status, 401);
   assert.equal((await s.call('POST', '/login', { role: 'mech', pin: '0000' })).status, 429);
-  const locked = await s.call('POST', '/login', { role: 'mech', pin: '1815' });
+  const locked = await s.call('POST', '/login', { role: 'mech', pin: '4321' });
   assert.equal(locked.status, 429, 'even the right PIN waits');
   assert.match(locked.data.error, /15 minutes/);
   s.tick(15 * 60000 + 1000);
-  assert.equal((await s.call('POST', '/login', { role: 'mech', pin: '1815' })).status, 200);
+  assert.equal((await s.call('POST', '/login', { role: 'mech', pin: '4321' })).status, 200);
 });
 
 test('a forged or expired cookie is refused, and changing the PIN signs people out', async () => {
   const s = setup();
-  await s.call('POST', '/login', { role: 'mech', pin: '1815' });
+  await s.call('POST', '/login', { role: 'mech', pin: '4321' });
   const good = s.jar.cookie;
   const [name, val] = good.split('=');
   const [payload, sig] = val.split('.');
@@ -96,7 +96,7 @@ test('a forged or expired cookie is refused, and changing the PIN signs people o
 
 test('machine lookup returns SN, filters and history newest first (with old "SERVICE 2" notes read as the level)', async () => {
   const s = setup();
-  await s.call('POST', '/login', { role: 'mech', pin: '1815' });
+  await s.call('POST', '/login', { role: 'mech', pin: '4321' });
   const r = await s.call('GET', '/machine?id=33606');
   assert.equal(r.status, 200);
   assert.equal(r.data.id, '336-06');
@@ -111,7 +111,7 @@ test('machine lookup returns SN, filters and history newest first (with old "SER
 
 test('submitting a service writes the right fields to the machine table and attaches the PDF', async () => {
   const s = setup();
-  await s.call('POST', '/login', { role: 'mech', pin: '1815' });
+  await s.call('POST', '/login', { role: 'mech', pin: '4321' });
   const r = await s.call('POST', '/service', service({ fluids: [{ name: '15W40', qty: '8', unit: 'GAL' }, { name: 'OTHER', qty: '2', unit: 'QT', desc: 'DEF' }] }));
   assert.equal(r.status, 200, JSON.stringify(r.data));
   assert.equal(r.data.pdfSaved, true);
@@ -133,7 +133,7 @@ test('submitting a service writes the right fields to the machine table and atta
 
 test('tapping Submit twice only saves once', async () => {
   const s = setup();
-  await s.call('POST', '/login', { role: 'mech', pin: '1815' });
+  await s.call('POST', '/login', { role: 'mech', pin: '4321' });
   const a = await s.call('POST', '/service', service());
   const b = await s.call('POST', '/service', service());
   assert.equal(b.data.duplicate, true);
@@ -143,7 +143,7 @@ test('tapping Submit twice only saves once', async () => {
 
 test('bad submissions are explained, not saved', async () => {
   const s = setup();
-  await s.call('POST', '/login', { role: 'mech', pin: '1815' });
+  await s.call('POST', '/login', { role: 'mech', pin: '4321' });
   const cases = [
     [{ mechanic: 'BOB' }, /who did the service/],
     [{ hours: '' }, /hour meter/],
@@ -164,7 +164,7 @@ test('bad submissions are explained, not saved', async () => {
 
 test('if the PDF upload fails the service is still saved, and the office can attach it later', async () => {
   const s = setup({ failUpload: true });
-  await s.call('POST', '/login', { role: 'mech', pin: '1815' });
+  await s.call('POST', '/login', { role: 'mech', pin: '4321' });
   const r = await s.call('POST', '/service', service());
   assert.equal(r.status, 200);
   assert.equal(r.data.pdfSaved, false);
@@ -174,7 +174,7 @@ test('if the PDF upload fails the service is still saved, and the office can att
 
 test('office list: cache fills in chunks, PDF downloads, older records can get a sheet attached', async () => {
   const s = setup();
-  await s.call('POST', '/login', { role: 'office', pin: 'LNH1815H' });
+  await s.call('POST', '/login', { role: 'office', pin: 'OFFICETEST9' });
   const d1 = await s.call('GET', '/office/data');
   assert.equal(d1.data.machines.length, 99);
   assert.deepEqual(d1.data.tables, {});
@@ -200,9 +200,9 @@ test('office list: cache fills in chunks, PDF downloads, older records can get a
 
 test('a new submission shows up in the office data straight away', async () => {
   const s = setup();
-  await s.call('POST', '/login', { role: 'mech', pin: '1815' });
+  await s.call('POST', '/login', { role: 'mech', pin: '4321' });
   const r = await s.call('POST', '/service', service({ eq: '938-09', filters: [], hours: 6400 }));
-  await s.call('POST', '/login', { role: 'office', pin: 'LNH1815H' });
+  await s.call('POST', '/login', { role: 'office', pin: 'OFFICETEST9' });
   const d = await s.call('GET', '/office/data');
   const recs = d.data.tables[machineByName('938-09').tableId].records;
   assert.equal(recs[0].id, r.data.recordId);
@@ -211,7 +211,7 @@ test('a new submission shows up in the office data straight away', async () => {
 
 test('requests from another website are refused', async () => {
   const s = setup();
-  const r = await s.call('POST', '/login', { role: 'mech', pin: '1815' }, { origin: 'https://evil.example' });
+  const r = await s.call('POST', '/login', { role: 'mech', pin: '4321' }, { origin: 'https://evil.example' });
   assert.equal(r.status, 403);
 });
 

@@ -1,5 +1,5 @@
 // Local preview with the fake Airtable (99 real machine tables, sample records).
-// node test/dev-server.mjs  ->  http://localhost:8888  (mechanic PIN 1815, office PIN LNH1815H)
+// node test/dev-server.mjs  ->  http://localhost:8888  (mechanic PIN 4321, office PIN OFFICETEST9)
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
@@ -9,7 +9,7 @@ import { makeFakeAirtable } from './fake-airtable.mjs';
 
 const PORT = Number(process.env.PORT || 8888);
 const root = new URL('../public/', import.meta.url).pathname;
-const env = { AIRTABLE_TOKEN: 'fake', SESSION_SECRET: 'local-preview-secret-0123456789', MECH_PIN: '1815', OFFICE_PIN: 'LNH1815H' };
+const env = { AIRTABLE_TOKEN: 'fake', SESSION_SECRET: 'local-preview-secret-0123456789', MECH_PIN: '4321', OFFICE_PIN: 'OFFICETEST9' };
 const deps = { env, airtable: makeFakeAirtable(), store: memoryStore(), now: () => Date.now(), ip: '127.0.0.1', log: (m) => console.log(m) };
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.webmanifest': 'application/manifest+json' };
 

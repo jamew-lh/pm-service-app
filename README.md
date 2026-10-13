@@ -5,8 +5,8 @@ for looking up records and downloading the PDF service sheet. It reads and
 writes the **Equipment PM Services** base in Airtable and runs on Netlify.
 It is a separate site from the timecard app.
 
-- Mechanics: `https://<your-site>/`, shop PIN **1815**
-- Office: `https://<your-site>/office.html`, office PIN **LNH1815H** (upper or lower case both work)
+- Mechanics: `https://<your-site>/`, the shared shop PIN (the `MECH_PIN` setting in Netlify)
+- Office: `https://<your-site>/office.html`, the office PIN (the `OFFICE_PIN` setting; upper or lower case both work)
 
 Each submission becomes a new row in that machine's own table, just like the
 old forms, and a PDF sheet is attached to the row's **PM SHEET** field.
@@ -45,8 +45,10 @@ In the new site, go to **Site configuration → Environment variables → Add a 
 |---|---|
 | `AIRTABLE_TOKEN` | the token from step 1 |
 | `SESSION_SECRET` | any long random text, at least 24 characters (use a password generator) |
-| `MECH_PIN` | `1815` |
-| `OFFICE_PIN` | `LNH1815H` |
+| `MECH_PIN` | the shop PIN for mechanics (4 digits) |
+| `OFFICE_PIN` | the office PIN |
+
+The PINs are kept only here, never in the code: Netlify refuses to deploy if a setting's value appears in the files.
 
 Then go to **Deploys → Trigger deploy → Deploy site** so the app picks them up.
 
@@ -62,11 +64,11 @@ set host `pm` and data to the Netlify address (for example `your-site.netlify.ap
 
 ## 5. Test before rolling out
 
-1. On your phone, open the site, enter **1815**, log a test service on a
+1. On your phone, open the site, enter the shop PIN, log a test service on a
    machine, and submit.
 2. In Airtable, open that machine's table. The new row should be there with
    SERVICE LEVEL filled in and the PDF in **PM SHEET**.
-3. Open `/office.html`, enter **LNH1815H**, and find the record. The first time,
+3. Open `/office.html`, enter the office PIN, and find the record. The first time,
    the office page takes about half a minute to read all 99 machines; after
    that it's quick. Open the record and click **Download PDF**.
 4. Delete the test row in Airtable when you're done.
@@ -103,4 +105,4 @@ screen** (Android) so the app opens like any other app.
 - `netlify/functions/api.mjs`: the `/api/*` entry point. The logic is in `lib/`
   (`app.mjs` routes, `records.mjs` field mapping, `pdf.mjs` the sheet, `auth.mjs` PINs).
 - `npm test` runs the API tests against a fake Airtable built from the real 99 machine tables.
-- `npm run dev` starts a local preview at <http://localhost:8888> with sample data (same PINs).
+- `npm run dev` starts a local preview at <http://localhost:8888> with sample data (shop PIN 4321, office PIN OFFICETEST9).
