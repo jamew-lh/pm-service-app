@@ -114,6 +114,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 4px; }
 .btn.primary:disabled { opacity: .4; cursor: not-allowed; }
 .btn.tan { background: var(--tan); color: var(--green); }
 .btn.ghost { background: var(--white); border: 1.5px solid var(--line); color: var(--ink); }
+.btn.ghost.confirm { border-color: var(--warn); color: var(--warn); background: var(--warn-soft); }
 .btn.small { width: auto; padding: 10px 16px; font-size: 13.5px; }
 .missing { font-size: 14px; color: var(--muted); text-align: center; }
 .dim { opacity: .45; pointer-events: none; }

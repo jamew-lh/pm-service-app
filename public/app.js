@@ -301,6 +301,27 @@ $('toReview').onclick = () => {
   $('sendErr').hidden = true;
   $('form').hidden = true; $('review').hidden = false; window.scrollTo(0, 0);
 };
+// Clear form: first tap asks, second tap clears. Keeps the mechanic's name.
+let clearTimer = null;
+$('clearForm').onclick = () => {
+  const b = $('clearForm');
+  if (!clearTimer) {
+    b.textContent = 'Tap again to clear everything';
+    b.classList.add('confirm');
+    clearTimer = setTimeout(resetClear, 4000);
+    return;
+  }
+  resetClear();
+  clearDraft();
+  renderAll();
+  window.scrollTo(0, 0);
+};
+function resetClear() {
+  clearTimeout(clearTimer); clearTimer = null;
+  $('clearForm').textContent = 'Clear form';
+  $('clearForm').classList.remove('confirm');
+}
+
 $('edit').onclick = () => { $('review').hidden = true; $('form').hidden = false; };
 
 let lastSavedEq = null;
