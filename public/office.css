@@ -66,3 +66,13 @@
 .sh-foot { display: flex; justify-content: space-between; border-top: 1.2px solid var(--tan); margin-top: 26px; padding-top: 6px; font-size: 8.5px; color: var(--muted); }
 .sh-foot b { color: var(--green); letter-spacing: .04em; }
 .top .in { max-width: 980px; }
+
+/* Not printed yet */
+.tag.toprint { background: var(--tan); color: var(--green); }
+.toprint-box { border: 2px solid var(--tan); background: var(--tan-soft); border-radius: 8px; padding: 12px 14px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.toprint-box.done { border: 1px solid var(--line); background: var(--faint); color: var(--muted); font-size: 14px; padding: 9px 12px; }
+.tp-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 260px; }
+.tp-text strong { color: var(--green); font-size: 16px; }
+.tp-text span { font-size: 13.5px; color: var(--muted); overflow-wrap: anywhere; }
+.tp-acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.pstate { display: inline-flex; align-items: center; }

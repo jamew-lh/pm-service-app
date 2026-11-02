@@ -264,3 +264,43 @@ test('Airtable client: paging, sort, typecast, upload URL, busy message', async 
   assert.deepEqual(JSON.parse(calls[3].init.body), { contentType: 'application/pdf', filename: 'a.pdf', file: 'JVA=' });
   await assert.rejects(at.listRecords('busy'), /busy/);
 });
+
+test('printed tracking: download marks a sheet printed, office can mark or unmark, and the cutoff is sent', async () => {
+  const s = setup();
+  await s.call('POST', '/login', { role: 'mech', pin: '4321' });
+  const sub = await s.call('POST', '/service', service({ clientId: 'print-test-1' }));
+  await s.call('POST', '/login', { role: 'office', pin: 'OFFICETEST9' });
+  const d1 = await s.call('GET', '/office/data');
+  assert.deepEqual(d1.data.printed, []);
+  assert.match(d1.data.printedBefore, /^2026-11-02T/);
+  const t = machineByName('336-06').tableId;
+  const pdf = await s.call('GET', `/office/pdf?t=${t}&r=${sub.data.recordId}&view=1`);
+  assert.equal(pdf.status, 200);
+  assert.deepEqual((await s.call('GET', '/office/data')).data.printed, [sub.data.recordId]);
+  assert.equal((await s.call('POST', '/office/printed', { ids: [sub.data.recordId], printed: false })).status, 200);
+  assert.deepEqual((await s.call('GET', '/office/data')).data.printed, []);
+  assert.equal((await s.call('POST', '/office/printed', { ids: [sub.data.recordId] })).status, 200);
+  assert.deepEqual((await s.call('GET', '/office/data')).data.printed, [sub.data.recordId]);
+  assert.equal((await s.call('POST', '/office/printed', { ids: [] })).status, 400);
+});
+
+test('print all: one PDF with every picked sheet, oldest first, and they are marked printed', async () => {
+  const s = setup();
+  await s.call('POST', '/login', { role: 'office', pin: 'OFFICETEST9' });
+  const a = machineByName('336-06').tableId, b = machineByName('938-09').tableId;
+  const recsA = s.airtable.tables.get(a).records, recsB = s.airtable.tables.get(b).records;
+  const pick = [`${a}.${recsA[0].id}`, `${b}.${recsB[0].id}`, `${a}.${recsA[1].id}`];
+  const r = await s.call('GET', `/office/pdf-batch?r=${encodeURIComponent(pick.join(','))}`);
+  assert.equal(r.status, 200, String(r.data?.error));
+  assert.match(r.headers.get('content-disposition'), /PM Service sheets .* \(3\)\.pdf/);
+  const { PDFDocument } = await import('pdf-lib');
+  const doc = await PDFDocument.load(r.data);
+  assert.equal(doc.getPageCount(), 3);
+  const printed = (await s.call('GET', '/office/data')).data.printed.sort();
+  assert.deepEqual(printed, [recsA[0].id, recsA[1].id, recsB[0].id].sort());
+  const tooMany = Array.from({ length: 41 }, () => pick[0]).join(',');
+  assert.equal((await s.call('GET', `/office/pdf-batch?r=${encodeURIComponent(tooMany)}`)).status, 400);
+  const mech = setup();
+  await mech.call('POST', '/login', { role: 'mech', pin: '4321' });
+  assert.equal((await mech.call('GET', `/office/pdf-batch?r=${encodeURIComponent(pick[0])}`)).status, 403, 'mechanics cannot use it');
+});

@@ -97,6 +97,12 @@ screen** (Android) so the app opens like any other app.
 - **PDF missing:** if the PDF can't be attached when a mechanic submits, the
   service is still saved, and the office can use **Attach PDF to Airtable** on
   that record. Older records can get a sheet attached the same way.
+- **Not printed yet:** the office page lists every service sheet that hasn't
+  been printed. Opening or downloading a sheet's PDF marks it printed, and
+  **Open all to print** puts every waiting sheet into one PDF (up to 40 at a
+  time) and marks them all. A sheet can also be marked printed or not printed
+  by hand. Sheets entered before 2 Nov 2026 9:30 AM count as printed
+  (`PRINTED_BEFORE` in `lib/config.mjs`).
 - **Wrong PINs:** after 5 wrong tries, that device has to wait 15 minutes.
 
 ## For a developer

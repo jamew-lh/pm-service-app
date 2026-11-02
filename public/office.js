@@ -5,6 +5,8 @@ let D = null;            // { machines, tables, mechanics, levels, types, freshM
 const BY_TABLE = new Map();
 let shown = 100;
 let current = null;      // { m, r }
+let PRINTED = new Set();  // record IDs marked printed in the office
+const isPrinted = (r) => (r.created && r.created < D.printedBefore) || PRINTED.has(r.id);
 
 /* ---------- sign-in ---------- */
 async function start() {
@@ -36,6 +38,7 @@ async function load() {
   $('loading').hidden = false;
   D = await api('/office/data');
   D.machines.forEach((m) => BY_TABLE.set(m.tableId, m));
+  PRINTED = new Set(D.printed || []);
   $('loading').hidden = true;
   $('signOut').hidden = false;
   $('listScreen').hidden = false;
@@ -115,8 +118,9 @@ function renderList() {
   const rows = allRecords().filter(({ m, r, low }) =>
     (!fm || m.tableId === fm) && (!fe || r.by === fe) &&
     (!fl || (fl === 'none' ? !r.level : r.level === fl)) && (!from || (r.date || '') >= from) &&
-    (!flag || (flag === 'hours' ? low : !r.pdf)));
+    (!flag || (flag === 'hours' ? low : flag === 'unprinted' ? !isPrinted(r) : !r.pdf)));
   renderMachineSummary(fm);
+  renderToPrint();
   const loaded = Object.keys(D.tables).length;
   $('count').textContent = `${rows.length} record${rows.length === 1 ? '' : 's'}${loaded < D.machines.length ? ` so far (${loaded} of ${D.machines.length} machines loaded)` : ''}`;
   const list = $('list'); list.innerHTML = '';
@@ -126,13 +130,53 @@ function renderList() {
     b.type = 'button'; b.className = 'item';
     b.innerHTML = `<span class="d">${esc(usDate(r.date) || 'No date')}</span><span class="eq">${esc(m.id)}</span>
       <span class="meta">${num(r.hours)} hrs · ${esc(title(r.by) || 'No name')}<span>${r.types.length ? ` · ${esc(r.types.join(', '))}` : ''}${r.filters.length ? ` · ${r.filters.length} filter${r.filters.length === 1 ? '' : 's'}` : ''}</span></span>
-      <span class="tags">${r.level ? `<span class="tag lvl">${esc(title(r.level))}</span>` : ''}${low ? '<span class="tag flag">Check hours</span>' : ''}${r.pdf ? '<span class="tag pdf">PDF saved</span>' : '<span class="tag nopdf">No PDF</span>'}</span>`;
+      <span class="tags">${isPrinted(r) ? '' : '<span class="tag toprint">Not printed</span>'}${r.level ? `<span class="tag lvl">${esc(title(r.level))}</span>` : ''}${low ? '<span class="tag flag">Check hours</span>' : ''}${r.pdf ? '<span class="tag pdf">PDF saved</span>' : '<span class="tag nopdf">No PDF</span>'}</span>`;
     b.onclick = () => openDetail(m.tableId, r.id, true);
     list.append(b);
   });
   $('more').hidden = rows.length <= shown;
 }
 $('more').onclick = () => { shown += 100; renderList(); };
+
+/* ---------- not printed yet ---------- */
+const BATCH_MAX = 40;
+function unprinted() {
+  return allRecords().filter(({ r }) => !isPrinted(r)).reverse(); // oldest first
+}
+function renderToPrint() {
+  const box = $('toPrint');
+  const loaded = Object.keys(D.tables).length >= D.machines.length;
+  const list = unprinted();
+  if (!list.length) {
+    box.className = 'toprint-box done';
+    box.innerHTML = loaded ? 'All service sheets are printed.' : '<span class="spinner"></span> Checking for sheets to print…';
+    return;
+  }
+  const batch = list.slice(0, BATCH_MAX);
+  const r = batch.map(({ m, r: x }) => `${m.tableId}.${x.id}`).join(',');
+  box.className = 'toprint-box';
+  box.innerHTML = `<div class="tp-text"><strong>${list.length} service sheet${list.length === 1 ? '' : 's'} not printed yet</strong>
+      <span>${list.slice(0, 6).map(({ m, r: x }) => `${esc(m.id)} (${esc(usDate(x.date))})`).join(', ')}${list.length > 6 ? ', …' : ''}</span></div>
+    <div class="tp-acts">
+      <a class="btn primary small" id="tpOpen" href="/api/office/pdf-batch?r=${encodeURIComponent(r)}&view=1" target="_blank" rel="noopener">Open ${batch.length === list.length ? 'all' : `first ${batch.length}`} to print</a>
+      <button type="button" class="btn ghost small" id="tpShow">Show them</button>
+      <button type="button" class="btn ghost small" id="tpMark">Mark all printed</button>
+    </div>`;
+  $('tpOpen').onclick = () => { batch.forEach(({ r: x }) => PRINTED.add(x.id)); setTimeout(renderList, 300); };
+  $('tpShow').onclick = () => { $('fFlag').value = 'unprinted'; $('fWhen').value = ''; $('fMach').value = ''; $('fMech').value = ''; $('fLvl').value = ''; $('fFlag').onchange(); };
+  const mark = $('tpMark');
+  mark.onclick = async () => {
+    if (mark.dataset.armed !== '1') { mark.dataset.armed = '1'; mark.textContent = `Tap again to mark ${list.length} printed`; mark.classList.add('confirm'); setTimeout(() => { if (mark.isConnected) { mark.dataset.armed = ''; mark.textContent = 'Mark all printed'; mark.classList.remove('confirm'); } }, 4000); return; }
+    mark.disabled = true;
+    try { await setPrinted(list.map(({ r: x }) => x.id), true); } catch (e) { alertBox(e.message); }
+    renderList();
+  };
+}
+async function setPrinted(ids, printed) {
+  await api('/office/printed', { method: 'POST', body: { ids, printed } });
+  ids.forEach((id) => (printed ? PRINTED.add(id) : PRINTED.delete(id)));
+}
+function alertBox(msg) { setSync(esc(msg), true); }
 
 function renderMachineSummary(tableId) {
   const box = $('machineSummary');
@@ -169,6 +213,7 @@ function openDetail(tableId, recId, push) {
   $('dl').href = `/api/office/pdf?${q}`;
   $('view').href = `/api/office/pdf?${q}&view=1`;
   $('attach').hidden = r.pdf;
+  showPrintState();
   window.scrollTo(0, 0);
 }
 function closeDetail(push) {
@@ -185,6 +230,26 @@ function route() {
   if (m && D.tables[m[1]]) openDetail(m[1], m[2], false);
   else closeDetail(false);
 }
+
+function showPrintState() {
+  if (!current) return;
+  const done = isPrinted(current.r);
+  $('printState').innerHTML = done ? '<span class="tag pdf">Printed</span>' : '<span class="tag toprint">Not printed</span>';
+  $('togglePrinted').textContent = done ? 'Mark as not printed' : 'Mark as printed';
+  // Sheets from before the tracker started always count as printed.
+  $('togglePrinted').hidden = !!current.r.created && current.r.created < D.printedBefore;
+}
+// Opening or downloading the PDF counts as printing it.
+['dl', 'view'].forEach((id) => $(id).addEventListener('click', () => { if (current) { PRINTED.add(current.r.id); showPrintState(); } }));
+$('togglePrinted').onclick = async () => {
+  if (!current) return;
+  const b = $('togglePrinted');
+  b.disabled = true;
+  try { await setPrinted([current.r.id], !isPrinted(current.r)); }
+  catch (e) { $('detailMsg').className = 'msg warn'; $('detailMsg').textContent = e.message; $('detailMsg').hidden = false; }
+  b.disabled = false;
+  showPrintState();
+};
 
 $('attach').onclick = async () => {
   if (!current) return;

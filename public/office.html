@@ -39,6 +39,7 @@
       <button class="btn ghost small" id="refreshAll" type="button">Check for new records</button>
     </div>
     <div class="msg info" id="sync" hidden></div>
+    <div id="toPrint" class="toprint-box done" aria-live="polite"></div>
     <div class="filters">
       <div><label class="label" for="fMach">Machine</label><select id="fMach"></select></div>
       <div><label class="label" for="fMech">Mechanic</label><select id="fMech"></select></div>
@@ -46,7 +47,7 @@
       <div><label class="label" for="fWhen">Period</label>
         <select id="fWhen"><option value="30">Last 30 days</option><option value="90" selected>Last 90 days</option><option value="365">Last 12 months</option><option value="">All time</option></select></div>
       <div><label class="label" for="fFlag">Show</label>
-        <select id="fFlag"><option value="">Everything</option><option value="hours">Hours to check</option><option value="nopdf">No PDF attached</option></select></div>
+        <select id="fFlag"><option value="">Everything</option><option value="unprinted">Not printed yet</option><option value="hours">Hours to check</option><option value="nopdf">No PDF attached</option></select></div>
     </div>
     <div id="machineSummary"></div>
     <div class="count" id="count"></div>
@@ -56,7 +57,7 @@
 
   <section id="detailScreen" class="stack" hidden>
     <div class="bar">
-      <button class="btn ghost small" id="back" type="button">&larr; All records</button>
+      <div class="actions"><button class="btn ghost small" id="back" type="button">&larr; All records</button><span id="printState" class="pstate"></span><button class="btn ghost small" id="togglePrinted" type="button">Mark as printed</button></div>
       <div class="actions">
         <button class="btn ghost small" id="attach" type="button" hidden>Attach PDF to Airtable</button>
         <a class="btn ghost small" id="view" target="_blank" rel="noopener">Open PDF</a>
